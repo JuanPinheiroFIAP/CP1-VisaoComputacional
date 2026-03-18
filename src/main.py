@@ -2,16 +2,15 @@ import cv2
 import os
 import matplotlib.pyplot as plt
 
-path_image = os.path.join("image", "09786ebbe90d0382a13fdb229a5ae7ae.jpg")
-image = cv2.imread(path_image)
+path_image = os.path.join("image", "figura13.png")
+image = cv2.imread(path_image,0)
 
 # ============================
 # Converter para cinza
 # ============================
-def converter_para_cinza(image):
-    return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-image_gray = converter_para_cinza(image)
+# def converter_para_cinza(image):
+#     return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+# image_gray = converter_para_cinza(image)
 
 
 # ============================
@@ -26,7 +25,7 @@ def apply_otsu(image):
     )
     return binary
 
-binary_otsu = apply_otsu(image_gray)
+binary_otsu = apply_otsu(image)
 
 
 # ============================
@@ -112,38 +111,32 @@ imagem_bbox, total_objetos = desenhar_bounding_boxes(image, contornos_detectados
 # ============================
 # Plot do pipeline
 # ============================
-def plot_pipeline(image, image_gray, binary_otsu, cleaned, imagem_bbox):
-
-    image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+def plot_pipeline(image, binary_otsu, cleaned, imagem_bbox):
     bbox_rgb = cv2.cvtColor(imagem_bbox, cv2.COLOR_BGR2RGB)
 
-    fig, axes = plt.subplots(1, 6, figsize=(18,5))
+    fig, axes = plt.subplots(1, 5, figsize=(18,5))
 
-    axes[0].imshow(image_rgb)
+    axes[0].imshow(image)
     axes[0].set_title("Imagem Original")
     axes[0].axis("off")
 
-    axes[1].imshow(image_gray, cmap="gray")
-    axes[1].set_title("Escala de Cinza")
-    axes[1].axis("off")
+    axes[1].hist(image.ravel(), bins=156, range=[0,256])
+    axes[1].set_title("Histograma")
 
-    axes[2].hist(image_gray.ravel(), bins=256, range=[0,256])
-    axes[2].set_title("Histograma")
+    axes[2].imshow(binary_otsu, cmap="gray")
+    axes[2].set_title("Segmentação Otsu")
+    axes[2].axis("off")
 
-    axes[3].imshow(binary_otsu, cmap="gray")
-    axes[3].set_title("Segmentação Otsu")
+    axes[3].imshow(cleaned, cmap="gray")
+    axes[3].set_title("Morfologia")
     axes[3].axis("off")
 
-    axes[4].imshow(cleaned, cmap="gray")
-    axes[4].set_title("Morfologia")
+    axes[4].imshow(bbox_rgb)
+    axes[4].set_title(f"Bounding Boxes\nObjetos: {total_objetos}")
     axes[4].axis("off")
-
-    axes[5].imshow(bbox_rgb)
-    axes[5].set_title(f"Bounding Boxes\nObjetos: {total_objetos}")
-    axes[5].axis("off")
 
     fig.tight_layout()
     plt.show()
 
 
-plot_pipeline(image, image_gray, binary_otsu, cleaned, imagem_bbox)
+plot_pipeline(image, binary_otsu, cleaned, imagem_bbox)
